@@ -1,0 +1,20 @@
+Pruebas de que se creo el pipeline:
+Al construirlo da error ya que todavia no tiene los parametros pasados para ejecutarse.
+
+[![1.png](https://i.postimg.cc/z3mtgdJj/1.png)](https://postimg.cc/SYrf0fY2)
+
+- Al ya construirse, se completan los datos
+
+[![2.png](https://i.postimg.cc/YC7kcR1Y/2.png)](https://postimg.cc/qz1Wy8Dv)
+
+- Output del job, indicando que finalizo correctamente
+
+[![3.png](https://i.postimg.cc/KvBFswgm/3.png)](https://postimg.cc/fJz6VHKP)
+
+- Correo recibido con datos de ingreso
+
+[![4.png](https://i.postimg.cc/HWfdzdnS/4.png)](https://postimg.cc/Jtcf4wbJ)
+
+- id nombre_de_usuario desde terminal, mostrando que se creo el usuario y se agrego a grupo correspondiente
+
+[![5.png](https://i.postimg.cc/8kFTLjpJ/5.png)](https://postimg.cc/qgTfTBC4)
