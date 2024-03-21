@@ -11,7 +11,7 @@ pipeline {
                 script {   // Descargar script en carpeta temporal y le da permisos de ejecucion
                     sh'''
                         cd /tmp/
-                        curl -O https://raw.githubusercontent.com/matiespi/matiespi/main/Desafio/script.sh
+                        curl -O https://raw.githubusercontent.com/matiespi/devops-bootcamp/main/Desafio/Fase%201/script.sh
                         chmod +x script.sh
                         ls -l script.sh
                     '''
