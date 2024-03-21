@@ -1,7 +1,7 @@
 Pasos para poder ejecutar pipeline:
-
+-
 Darles permisos a jenkins para ejecutar sudo sin passwd:
-- 
+
 Ejecutar: sudo visudo
 Ir a final del archivo y agregar la siguiente linea --> jenkins ALL=(ALL:ALL) NOPASSWD:ALL
 
@@ -23,6 +23,7 @@ En Jenkins,
 ------------------------------------------------------------------------------------------------------------------------------
 
 EJECUCION DE JOB:
+-
 El job cuenta con dos simples parametros:
 - Nombre y apellido --- A partir de estos datos el job creara el usuario
 - Mail --- Se debera ingresar el mail de usuario en donde se informara los datos de ingreso
