@@ -20,6 +20,9 @@ En Jenkins,
   - En "System" tambien buscar "Extended E-mail Notification":
     Agregar configuracion de smtp server deseado, en "Avanzado" agregar las credenciales creadas anteriormente en el paso 2
 
+# Al crear el job, el patch es ./Desafio/Fase1/Jenkinsfile-Fase1
+
+
 ------------------------------------------------------------------------------------------------------------------------------
 
 EJECUCION DE JOB:
