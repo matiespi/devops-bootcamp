@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+    stages {
+        stage('Git-Clone') {
+            steps {
+                script{
+                    sh'''
+                        cd /tmp
+                        git clone https://github.com/matiespi/nodejs-helloworld-api.git"
+                        sudo npm install
+                    '''
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                sh "npm test"
+            }
+        }
+    }
+}
