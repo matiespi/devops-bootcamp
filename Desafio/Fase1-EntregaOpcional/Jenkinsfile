@@ -4,10 +4,14 @@ pipeline {
         string(name: 'PROCESO', defaultValue: 'bash', description: 'Ingrese nombr de proceso')
     }
     stages {
+        stage('Set execution persmisions') {
+            steps {
+                sh 'chmod +x ./Desafio/Ejecicio-Clase13/script.sh'
+            }
+        }
         stage('Execution') {
             steps {
                 script {
-                    sh 'chmod +x ./Desafio/Ejecicio-Clase13/script.sh'
                     sh "./Desafio/Ejecicio-Clase13/script.sh $PROCESO"        
                 }
             }
