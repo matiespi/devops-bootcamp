@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+    parameters {  // Se declaran parametros
+        string(name: 'PROCESO', defaultValue: 'bash', description: 'Ingrese nombr de proceso')
+    }
+    stages {
+        stage('Execution') {
+            steps {
+                script {
+                    sh 'chmod +x ./Desafio/Ejecicio-Clase13/script.sh'
+                    sh "./Desafio/Ejecicio-Clase13/script.sh $PROCESO"        
+                }
+            }
+        }
+    }
+}
