@@ -2,4 +2,4 @@ En este desafio se propone poner en practica los conocimientos aprendidos hasta 
 Servicio utilizados:
 EC2 - IAM - S3
 
-[!NOTE]
+> [!NOTE]
