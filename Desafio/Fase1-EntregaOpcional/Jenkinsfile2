@@ -1,18 +1,23 @@
 pipeline {
     agent any
-    parameters {  // Se declaran parametros
+    parameters {
         string(name: 'KEYWORD', defaultValue: '', description: 'Palabra clave para filtrar las instancias EC2')
     }
+
     stages {
-        stage('Set execution persmisions') {
+        stage('Set execution permissions') {
             steps {
                 sh 'chmod +x ./Desafio/Fase1-EntregaOpcional/script2.sh'
             }
         }
+
         stage('Execution') {
             steps {
                 script {
-                    sh "./Desafio/Fase1-EntregaOpcional/script2.sh $KEYWORD"        
+                    def AWS_ACCESS_KEY_ID = credentialsId('UserJenkins-AWS').accessKeyId
+                    def AWS_SECRET_ACCESS_KEY = credentialsId('UserJenkins-AWS').secretKeyId
+
+                    sh "./Desafio/Fase1-EntregaOpcional/script2.sh ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} \$KEYWORD"
                 }
             }
         }
