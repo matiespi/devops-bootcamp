@@ -9,5 +9,12 @@ pipeline {
                 sh 'chmod +x ./Desafio/Fase1-EntregaOpcional/script2.sh'
             }
         }
+        stage('Execution') {
+            steps {
+                script {
+                    sh "./Desafio/Fase1-EntregaOpcional/script2.sh $KEYWORD"        
+                }
+            }
+        }
     }
 }
