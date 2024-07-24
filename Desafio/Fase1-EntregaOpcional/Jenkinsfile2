@@ -1,0 +1,13 @@
+pipeline {
+    agent any
+    parameters {  // Se declaran parametros
+        string(name: 'KEYWORD', defaultValue: '', description: 'Palabra clave para filtrar las instancias EC2')
+    }
+    stages {
+        stage('Set execution persmisions') {
+            steps {
+                sh 'chmod +x ./Desafio/Fase1-EntregaOpcional/script2.sh'
+            }
+        }
+    }
+}
