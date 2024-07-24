@@ -47,5 +47,6 @@ for INSTANCE_ID in $INSTANCE_IDS; do
   # Usar credenciales temporales para comandos posteriores (por ejemplo, comprimir registros, copiar a S3)
   # ... (implementa tus comandos existentes usando credenciales temporales)
   # ...
+   # Conéctate a la instancia, comprime los logs y copia el archivo de vuelta a la máquina local
 
 done
