@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Configurar la región de AWS
+aws configure set region us-east-1 
+
 # Parámetro ingresado en el job de Jenkins
 KEYWORD=${KEYWORD}
 
