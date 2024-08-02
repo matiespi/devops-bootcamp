@@ -1,22 +1,32 @@
 pipeline {
     agent any
     parameters {
-        string(name: 'KEYWORD', defaultValue: '', description: 'Palabra clave para filtrar las instancias EC2')
+        string(name: 'TAG_KEY', defaultValue: 'Environment', description: 'Clave de la etiqueta para filtrar instancias EC2')
+        choice(name: 'TAG_VALUE', choices: ['DAI', 'ONETEAM'], description: 'Valor de la etiqueta para filtrar instancias EC2')
+        string(name: 'S3_BUCKET', defaultValue: 'tu-bucket-de-s3', description: 'Nombre del bucket de S3')
     }
     environment {
-        AWS_CREDENTIALS_ID = 'UserJenkins-AWS' // Reemplaza con el ID de tus credenciales
+        AWS_DEFAULT_REGION = "us-east-1" // Ajusta según sea necesario
+        PYTHON_SCRIPT_PATH = './Desafio/Fase1-EntregaOpcional/script.py' // Ruta del script Python
     }
     stages {
-        stage('Set execution permissions') {
+        stage('Run Python Script') {
             steps {
-                sh 'chmod +x ./Desafio/Fase1-EntregaOpcional/script2.sh'
-            }
-        }
-        stage('Execution') {
-            steps {
-                withAWS(credentials: "${AWS_CREDENTIALS_ID}") {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
-                        sh "./Desafio/Fase1-EntregaOpcional/script2.sh $KEYWORD"        
+                        def tagKey = params.TAG_KEY
+                        def tagValue = params.TAG_VALUE
+                        def s3Bucket = params.S3_BUCKET
+                        
+                        sh """
+                        #!/bin/bash
+                        TAG_KEY=${tagKey}
+                        TAG_VALUE=${tagValue}
+                        S3_BUCKET=${s3Bucket}
+                        
+                        # Ejecutar el script Python
+                        python3 ${env.PYTHON_SCRIPT_PATH} --tag-key \$TAG_KEY --tag-value \$TAG_VALUE --s3-bucket \$S3_BUCKET --region ${env.AWS_DEFAULT_REGION}
+                        """
                     }
                 }
             }
