@@ -31,5 +31,33 @@ pipeline {
                 }
             }
         }
+        stage('Download from S3 and Send Email') {
+            steps {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    script {
+                        def tagValue = params.TAG_VALUE
+                        def s3Bucket = params.S3_BUCKET
+                        
+                        // Define the name of the compressed log file based on the TAG_VALUE
+                        def timestamp = new Date().format("yyyyMMddHHmmss")
+                        def compressedLog = "logs_${tagValue}_${timestamp}.zip"
+
+                        // Download the file from S3 to the Jenkins workspace
+                        sh """
+                        aws s3 cp s3://${s3Bucket}/${compressedLog} .
+                        """
+
+                        // Send email with the downloaded file attached
+                        emailext (
+                            to: "matiasrv96@gmail.com",
+                            subject: "Logs de ${tagValue} - Job #${env.BUILD_NUMBER}",
+                            body: "Adjunto se encuentran los logs comprimidos de la instancia EC2 etiquetada como ${tagValue}.",
+                            attachmentsPattern: "${compressedLog}",
+                            mimeType: 'text/plain'
+                        )
+                    }
+                }
+            }
+        }
     }
 }
