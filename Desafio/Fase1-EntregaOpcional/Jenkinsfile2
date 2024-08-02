@@ -10,6 +10,14 @@ pipeline {
         PYTHON_SCRIPT_PATH = './Desafio/Fase1-EntregaOpcional/script.py' // Ruta del script Python
     }
     stages {
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Instalar boto3 en el entorno de Jenkins
+                    sh 'pip3 install boto3'
+                }
+            }
+        }
         stage('Run Python Script') {
             steps {
                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
