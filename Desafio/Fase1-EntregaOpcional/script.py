@@ -66,7 +66,7 @@ for instance_id in instance_ids:
                 f"aws s3 cp /tmp/{compressed_log} s3://{S3_BUCKET}/"
             ]
         },
-        TimeoutSeconds=600,
+        TimeoutSeconds=60,
         Comment="Comprimir logs y subir a S3"
     )
 
