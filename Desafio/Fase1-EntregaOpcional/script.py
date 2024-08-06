@@ -1,60 +1,17 @@
-import boto3
-import time
-import argparse
+# ... código anterior ...
 
-# Configuración de argparse para recibir parámetros
-parser = argparse.ArgumentParser(description='Filtrar instancias EC2 y comprimir logs.')
-parser.add_argument('--tag-key', required=True, help='Clave de la etiqueta para filtrar instancias EC2')
-parser.add_argument('--tag-value', required=True, help='Valor de la etiqueta para filtrar instancias EC2')
-parser.add_argument('--s3-bucket', required=True, help='Nombre del bucket de S3')
-parser.add_argument('--region', required=True, help='Región de AWS')
-
-args = parser.parse_args()
-
-# Asignación de parámetros
-AWS_REGION = args.region
-TAG_KEY = args.tag_key
-TAG_VALUE = args.tag_value
-S3_BUCKET = args.s3_bucket
-
-# Crear una sesión con AWS
-session = boto3.Session(
-    region_name=AWS_REGION
-)
-
-# Conectar al servicio EC2 y SSM
-ec2 = session.client('ec2')
-ssm = session.client('ssm')
-
-# Filtrar instancias EC2 con la etiqueta específica
-response = ec2.describe_instances(
-    Filters=[
-        {
-            'Name': f'tag:{TAG_KEY}',
-            'Values': [TAG_VALUE]
-        }
-    ]
-)
-
-# Procesar la respuesta para obtener los IDs de las instancias
-instance_ids = []
-for reservation in response['Reservations']:
-    for instance in reservation['Instances']:
-        instance_ids.append(instance['InstanceId'])
-
-if not instance_ids:
-    print(f"No se encontraron instancias con la etiqueta {TAG_KEY}={TAG_VALUE}")
-    exit(0)
-
-print(f"Instancias encontradas: {instance_ids}")
+# Lista para almacenar los nombres de los archivos comprimidos
+compressed_logs = []
 
 # Enviar comandos SSM para comprimir logs y subir a S3
-for instance_id in instance_ids:
-    print(f"Procesando instancia {instance_id}")
+for detail in instance_details:
+    instance_id = detail['InstanceId']
+    instance_name = detail['InstanceName']
+    print(f"Procesando instancia {instance_id} ({instance_name})")
 
     # Nombre de archivo comprimido
     timestamp = time.strftime("%Y%m%d%H%M%S")
-    compressed_log = f"logs_{instance_id}_{timestamp}.zip"
+    compressed_log = f"logs_{instance_name}_{timestamp}.zip"
 
     # Comando SSM
     ssm_response = ssm.send_command(
@@ -81,5 +38,10 @@ for instance_id in instance_ids:
     try:
         s3.head_object(Bucket=S3_BUCKET, Key=compressed_log)
         print(f"Archivo {compressed_log} subido correctamente a S3.")
+        compressed_logs.append(compressed_log)  # Guardar el nombre del archivo comprimido
     except:
         print(f"Error: No se encontró el archivo {compressed_log} en el bucket S3.")
+
+# Imprimir todos los nombres de archivos comprimidos
+for log in compressed_logs:
+    print(log)
