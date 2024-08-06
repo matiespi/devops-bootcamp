@@ -25,16 +25,23 @@ pipeline {
                         def tagKey = params.TAG_KEY
                         def tagValue = params.TAG_VALUE
                         def s3Bucket = params.S3_BUCKET
-                        
-                        sh """
-                        #!/bin/bash
-                        TAG_KEY=${tagKey}
-                        TAG_VALUE=${tagValue}
-                        S3_BUCKET=${s3Bucket}
-                        
-                        # Ejecutar el script Python
-                        python3 ${env.PYTHON_SCRIPT_PATH} --tag-key \$TAG_KEY --tag-value \$TAG_VALUE --s3-bucket \$S3_BUCKET --region ${env.AWS_DEFAULT_REGION}
-                        """
+
+                        // Capturar los nombres de los archivos comprimidos desde la salida del script Python
+                        def compressedLogs = sh(
+                            script: """
+                            #!/bin/bash
+                            TAG_KEY=${tagKey}
+                            TAG_VALUE=${tagValue}
+                            S3_BUCKET=${s3Bucket}
+
+                            # Ejecutar el script Python y capturar los nombres de los archivos comprimidos
+                            python3 ${env.PYTHON_SCRIPT_PATH} --tag-key \$TAG_KEY --tag-value \$TAG_VALUE --s3-bucket \$S3_BUCKET --region ${env.AWS_DEFAULT_REGION}
+                            """,
+                            returnStdout: true
+                        ).trim().split("\n") // Dividir la salida por líneas, para manejar múltiples nombres
+
+                        // Guardar los nombres de los archivos comprimidos para las siguientes etapas
+                        env.COMPRESSED_LOGS = compressedLogs.join(",")
                     }
                 }
             }
@@ -43,27 +50,26 @@ pipeline {
             steps {
                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
-                        def tagValue = params.TAG_VALUE // Redefinir dentro del script block
+                        def compressedLogs = env.COMPRESSED_LOGS.split(",")
                         def s3Bucket = params.S3_BUCKET
-                        
-                        // Define the pattern for compressed log files based on the TAG_VALUE
-                        def compressedLogPattern = "logs_${tagValue}_*.zip"
+                        def tagValue = params.TAG_VALUE 
 
-                        // Download the files matching the pattern from S3 to the Jenkins workspace
-                        sh """
-                        aws s3 cp s3://${s3Bucket}/ . --recursive --exclude "*" --include "${compressedLogPattern}"
-                        """
+                        // Descargar cada archivo desde S3 al workspace de Jenkins
+                        compressedLogs.each { logFile ->
+                            sh """
+                            aws s3 cp s3://${s3Bucket}/${logFile} .
+                            """
+                        }
 
-                        // Find the downloaded zip files in the workspace
-                        def files = findFiles(glob: compressedLogPattern)
-                        def attachments = files.collect { it.path }.join(',')
+                        // Convertir la lista de archivos a un patrón de búsqueda de Jenkins
+                        def attachmentPattern = compressedLogs.join(",")
 
-                        // Send email with the downloaded files attached
+                        // Enviar un correo electrónico con los archivos descargados como adjuntos
                         emailext (
                             to: "matiasrv96@gmail.com",
                             subject: "Logs de ${tagValue} - Job #${env.BUILD_NUMBER}",
-                            body: "Adjunto se encuentran los logs comprimidos de la(s) instancia(s) EC2 etiquetada(s) como ${tagValue}.",
-                            attachmentsPattern: attachments,
+                            body: "Adjunto se encuentran los logs comprimidos de las instancias EC2 etiquetadas como ${tagValue}.",
+                            attachmentsPattern: attachmentPattern,
                             mimeType: 'text/plain'
                         )
                     }
