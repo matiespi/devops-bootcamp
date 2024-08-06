@@ -7,7 +7,7 @@ pipeline {
     }
     environment {
         AWS_DEFAULT_REGION = "us-east-1" // Ajusta según sea necesario
-        PYTHON_SCRIPT_PATH = 'path/to/your/script.py' // Ruta del script Python
+        PYTHON_SCRIPT_PATH = './Desafio/Fase1-EntregaOpcional/script.py' // Ruta del script Python
     }
     stages {
         stage('Install Dependencies') {
