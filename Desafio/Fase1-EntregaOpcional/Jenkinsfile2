@@ -7,7 +7,7 @@ pipeline {
     }
     environment {
         AWS_DEFAULT_REGION = "us-east-1" // Ajusta según sea necesario
-        PYTHON_SCRIPT_PATH = './Desafio/Fase1-EntregaOpcional/script.py' // Ruta del script Python
+        PYTHON_SCRIPT_PATH = 'path/to/your/script.py' // Ruta del script Python
     }
     stages {
         stage('Install Dependencies') {
@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Run Python Script') {
             steps {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         def tagKey = params.TAG_KEY
                         def tagValue = params.TAG_VALUE
@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Download from S3 and Send Email') {
             steps {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         def tagValue = params.TAG_VALUE
                         def s3Bucket = params.S3_BUCKET
