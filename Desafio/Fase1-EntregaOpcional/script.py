@@ -55,8 +55,6 @@ if not instance_details:
     print(f"No se encontraron instancias con la etiqueta {TAG_KEY}={TAG_VALUE}")
     exit(0)
 
-print(f"Instancias encontradas: {[detail['InstanceId'] for detail in instance_details]}")
-
 # Lista para almacenar los nombres de los archivos comprimidos
 compressed_logs = []
 
@@ -64,7 +62,6 @@ compressed_logs = []
 for detail in instance_details:
     instance_id = detail['InstanceId']
     instance_name = detail['InstanceName']
-    print(f"Procesando instancia {instance_id} ({instance_name})")
 
     # Nombre de archivo comprimido
     timestamp = time.strftime("%Y%m%d%H%M%S")
@@ -85,7 +82,6 @@ for detail in instance_details:
     )
 
     command_id = ssm_response['Command']['CommandId']
-    print(f"Comando enviado a la instancia {instance_id}, Command ID: {command_id}")
 
     # Esperar a que el comando se ejecute
     time.sleep(60)
@@ -94,11 +90,10 @@ for detail in instance_details:
     s3 = session.client('s3')
     try:
         s3.head_object(Bucket=S3_BUCKET, Key=compressed_log)
-        print(f"Archivo {compressed_log} subido correctamente a S3.")
         compressed_logs.append(compressed_log)  # Guardar el nombre del archivo comprimido
     except:
         print(f"Error: No se encontró el archivo {compressed_log} en el bucket S3.")
 
-# Imprimir todos los nombres de archivos comprimidos
+# Imprimir solo los nombres de archivos comprimidos, sin mensajes adicionales
 for log in compressed_logs:
     print(log)
