@@ -66,7 +66,7 @@ pipeline {
                         // Enviar un correo electrónico con los archivos descargados como adjuntos
                         emailext (
                             to: "matiasrv96@gmail.com",
-                            subject: "Logs de ${tagValue} - Job #${env.BUILD_NUMBER}",
+                            subject: "Logs de ${TAG_VALUE} - Job #${env.BUILD_NUMBER}",
                             body: "Adjunto se encuentran los logs comprimidos de las instancias EC2 etiquetadas como ${tagValue}.",
                             attachmentsPattern: attachmentPattern,
                             mimeType: 'text/plain'

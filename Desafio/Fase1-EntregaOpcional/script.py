@@ -63,8 +63,8 @@ for detail in instance_details:
     instance_id = detail['InstanceId']
     instance_name = detail['InstanceName']
 
-    # Nombre de archivo comprimido
-    timestamp = time.strftime("%Y%m%d%H%M%S")
+    # Nombre de archivo comprimido (solo fecha)
+    timestamp = time.strftime("%Y%m%d")  # Formato de fecha YYYYMMDD
     compressed_log = f"logs_{instance_name}_{timestamp}.zip"
 
     # Comando SSM
