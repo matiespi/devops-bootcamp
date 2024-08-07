@@ -74,12 +74,15 @@ pipeline {
 
                         if (downloadedFiles) {
                             // Enviar un correo electrónico con los archivos descargados como adjuntos
-                            emailext (
+                           emailext (
                                 to: "matiasrv96@gmail.com",
-                                subject: "Logs de instancias ${tagValue} - Job #${env.BUILD_NUMBER}",
-                                body: "Adjunto se encuentran los logs comprimidos de las instancias EC2.",
-                                attachmentsPattern: "${env.WORKSPACE}/logs_Actividad-AWS-Grupo2-test_20240807.zip,${env.WORKSPACE}/logs_Test2-AWS-Grupo2-test2_20240807.zip",  // Aquí utilizamos un patrón general
-                                mimeType: 'text/plain'
+                                cc: "otra_direccion@example.com", // Prueba enviar a otra dirección también
+                                subject: "Logs de instancias EC2 - Job #${env.BUILD_NUMBER}",
+                                body: """Adjunto se encuentran los logs comprimidos de las instancias EC2.
+                                        Archivos adjuntos: ${attachmentPattern}""",
+                                attachmentsPattern: attachmentPattern,
+                                mimeType: 'text/plain',
+                                replyTo: 'no-reply@example.com'
                             )
 
                             // Eliminar los archivos descargados
