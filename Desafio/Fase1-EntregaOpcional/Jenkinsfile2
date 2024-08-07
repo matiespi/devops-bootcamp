@@ -61,24 +61,28 @@ pipeline {
                             """
                         }
 
-                        // Enviar un correo electrónico por cada archivo
+                        // Enviar correos en paralelo
+                        def emailJobs = [:]
                         compressedLogs.each { logFile ->
-                            def logFilePath = "${env.WORKSPACE}/${logFile}"
-                            if (fileExists(logFilePath)) {
-                                emailext (
-                                    to: "matiasrv96@gmail.com",
-                                    subject: "Logs de instancias '${tagValue}' - Job #${env.BUILD_NUMBER}",
-                                    body: "Adjunto se encuentra el log comprimido de la instancia EC2.",
-                                    attachmentsPattern: logFile,
-                                    mimeType: 'text/plain'
-                                )
-                            } else {
-                                error("El archivo ${logFilePath} no existe en el directorio de trabajo.")
-                            }
+                            emailJobs["Send email for ${logFile}"] = {
+                                def logFilePath = "${env.WORKSPACE}/${logFile}"
+                                if (fileExists(logFilePath)) {
+                                    emailext (
+                                        to: "matiasrv96@gmail.com",
+                                        subject: "Logs de ${tagValue} - Job #${env.BUILD_NUMBER}",
+                                        body: "Adjunto se encuentra el log comprimido de la instancia EC2.",
+                                        attachmentsPattern: logFile,
+                                        mimeType: 'text/plain'
+                                    )
+                                } else {
+                                    error("El archivo ${logFilePath} no existe en el directorio de trabajo.")
+                                }
 
-                            // Eliminar el archivo después de enviar el correo
-                            sh "rm -f ${logFilePath}"
+                                // Eliminar el archivo después de enviar el correo
+                                sh "rm -f ${logFilePath}"
+                            }
                         }
+                        parallel emailJobs
                     }
                 }
             }
