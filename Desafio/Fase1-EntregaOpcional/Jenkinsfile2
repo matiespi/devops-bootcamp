@@ -61,16 +61,14 @@ pipeline {
                             """
                         }
 
-                        // Construir el patrón de adjuntos basado en los archivos descargados
-                        def attachmentPattern = compressedLogs.collect { logFile ->
-                            return "${env.WORKSPACE}/${logFile}"
-                        }.join(" ")  // Cambiado a espacios
+                        // Usar el patrón general para adjuntar archivos
+                        def attachmentPattern = "logs_*.zip"
 
                         echo "Archivos a adjuntar: ${attachmentPattern}"
                         
-                        // Verificar si los archivos están en el directorio de trabajo
+                          // Verificar si los archivos están en el directorio de trabajo
                         def downloadedFiles = sh(
-                            script: "ls ${attachmentPattern}",
+                            script: "ls ${env.WORKSPACE}/${attachmentPattern}",
                             returnStdout: true
                         ).trim()
 
@@ -80,13 +78,13 @@ pipeline {
                                 to: "matiasrv96@gmail.com",
                                 subject: "Logs de instancias ${tagValue} - Job #${env.BUILD_NUMBER}",
                                 body: "Adjunto se encuentran los logs comprimidos de las instancias EC2.",
-                                attachmentsPattern: "logs_*.zip",  // Aquí utilizamos un patrón general
+                                attachmentsPattern: attachmentPattern,  // Aquí utilizamos un patrón general
                                 mimeType: 'text/plain'
                             )
 
                             // Eliminar los archivos descargados
                             sh """
-                            rm -f ${attachmentPattern}
+                            rm -f ${env.WORKSPACE}/${attachmentPattern}
                             """
                         } else {
                             error("No se encontraron archivos descargados para adjuntar.")
