@@ -48,7 +48,7 @@ pipeline {
         }
         stage('Download from S3 and Send Email') {
             steps {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         def compressedLogs = env.COMPRESSED_LOGS.split(",")
                         def s3Bucket = params.S3_BUCKET
