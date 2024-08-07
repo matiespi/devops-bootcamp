@@ -67,7 +67,7 @@ pipeline {
                             if (fileExists(logFilePath)) {
                                 emailext (
                                     to: "matiasrv96@gmail.com",
-                                    subject: "Logs de ${logFile} - Job #${env.BUILD_NUMBER}",
+                                    subject: "Logs de instancias '${tagValue}' - Job #${env.BUILD_NUMBER}",
                                     body: "Adjunto se encuentra el log comprimido de la instancia EC2.",
                                     attachmentsPattern: logFile,
                                     mimeType: 'text/plain'
