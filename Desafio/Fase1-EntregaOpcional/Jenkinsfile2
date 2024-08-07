@@ -48,10 +48,11 @@ pipeline {
         }
         stage('Download from S3 and Send Email') {
             steps {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         def compressedLogs = env.COMPRESSED_LOGS.split(",")
                         def s3Bucket = params.S3_BUCKET
+                        def tagValue = params.TAG_VALUE
 
                         // Descargar cada archivo desde S3 al workspace de Jenkins
                         compressedLogs.each { logFile ->
@@ -60,9 +61,16 @@ pipeline {
                             """
                         }
 
+                        // Construir el patrón de adjuntos basado en los archivos descargados
+                        def attachmentPattern = compressedLogs.collect { logFile ->
+                            return "${env.WORKSPACE}/${logFile}"
+                        }.join(",")
+                        
+                        echo "Archivos a adjuntar: ${attachmentPattern}"
+                        
                         // Verificar si los archivos están en el directorio de trabajo
                         def downloadedFiles = sh(
-                            script: "ls ${env.WORKSPACE}/logs_*.zip",
+                            script: "ls ${attachmentPattern}",
                             returnStdout: true
                         ).trim()
 
@@ -70,15 +78,15 @@ pipeline {
                             // Enviar un correo electrónico con los archivos descargados como adjuntos
                             emailext (
                                 to: "matiasrv96@gmail.com",
-                                subject: "Logs de instancias EC2 - Job #${env.BUILD_NUMBER}",
+                                subject: "Logs de instancias ${tagValue} - Job #${env.BUILD_NUMBER}",
                                 body: "Adjunto se encuentran los logs comprimidos de las instancias EC2.",
-                                attachmentsPattern: "logs_*.zip",
+                                attachmentsPattern: attachmentPattern,
                                 mimeType: 'text/plain'
                             )
 
                             // Eliminar los archivos descargados
                             sh """
-                            rm -f ${env.WORKSPACE}/logs_*.zip
+                            rm -f ${attachmentPattern}
                             """
                         } else {
                             error("No se encontraron archivos descargados para adjuntar.")
