@@ -61,37 +61,23 @@ pipeline {
                             """
                         }
 
-                        // Usar el patrón general para adjuntar archivos
-                        def attachmentPattern = "logs_*.zip"
+                        // Enviar un correo electrónico por cada archivo
+                        compressedLogs.each { logFile ->
+                            def logFilePath = "${env.WORKSPACE}/${logFile}"
+                            if (fileExists(logFilePath)) {
+                                emailext (
+                                    to: "matiasrv96@gmail.com",
+                                    subject: "Logs de ${logFile} - Job #${env.BUILD_NUMBER}",
+                                    body: "Adjunto se encuentra el log comprimido de la instancia EC2.",
+                                    attachmentsPattern: logFile,
+                                    mimeType: 'text/plain'
+                                )
+                            } else {
+                                error("El archivo ${logFilePath} no existe en el directorio de trabajo.")
+                            }
 
-                        echo "Archivos a adjuntar: ${attachmentPattern}"
-                        
-                          // Verificar si los archivos están en el directorio de trabajo
-                        def downloadedFiles = sh(
-                            script: "ls ${env.WORKSPACE}/${attachmentPattern}",
-                            returnStdout: true
-                        ).trim()
-
-                        if (downloadedFiles) {
-                            // Enviar un correo electrónico con los archivos descargados como adjuntos
-                           emailext (
-                                to: "matiasrv96@gmail.com",
-                                cc: "otra_direccion@example.com", // Prueba enviar a otra dirección también
-                                subject: "Logs de instancias EC2 - Job #${env.BUILD_NUMBER}",
-                                body: """Adjunto se encuentran los logs comprimidos de las instancias EC2.
-                                        Archivos adjuntos: ${attachmentPattern}""",
-                                attachmentsPattern: attachmentPattern,
-                                mimeType: 'text/plain',
-                                replyTo: 'no-reply@example.com'
-                            )
-
-                            // Eliminar los archivos descargados
-                            sh """
-                            rm -f ${env.WORKSPACE}/${attachmentPattern}
-                            """
-                        } else {
-                            error("No se encontraron archivos descargados para adjuntar.")
-                        }
+                            // Eliminar el archivo después de enviar el correo
+                            sh "rm -f ${logFilePath}"
                     }
                 }
             }
