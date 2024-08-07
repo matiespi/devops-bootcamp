@@ -78,7 +78,7 @@ pipeline {
                                 to: "matiasrv96@gmail.com",
                                 subject: "Logs de instancias ${tagValue} - Job #${env.BUILD_NUMBER}",
                                 body: "Adjunto se encuentran los logs comprimidos de las instancias EC2.",
-                                attachmentsPattern: attachmentPattern,  // Aquí utilizamos un patrón general
+                                attachmentsPattern: "${env.WORKSPACE}/logs_Actividad-AWS-Grupo2-test_20240807.zip,${env.WORKSPACE}/logs_Test2-AWS-Grupo2-test2_20240807.zip",  // Aquí utilizamos un patrón general
                                 mimeType: 'text/plain'
                             )
 
