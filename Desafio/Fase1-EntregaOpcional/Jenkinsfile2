@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Run Python Script') {
             steps {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         def tagKey = params.TAG_KEY
                         def tagValue = params.TAG_VALUE
@@ -48,30 +48,41 @@ pipeline {
         }
         stage('Download from S3 and Send Email') {
             steps {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AWS-Jenkins', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'UserJenkins-AWS', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         def compressedLogs = env.COMPRESSED_LOGS.split(",")
                         def s3Bucket = params.S3_BUCKET
-                        def tagValue = params.TAG_VALUE 
 
                         // Descargar cada archivo desde S3 al workspace de Jenkins
                         compressedLogs.each { logFile ->
                             sh """
-                            aws s3 cp s3://${s3Bucket}/${logFile} .
+                            aws s3 cp s3://${s3Bucket}/${logFile} ${env.WORKSPACE}/
                             """
                         }
 
-                        // Convertir la lista de archivos a un patrón de búsqueda de Jenkins
-                        def attachmentPattern = compressedLogs.join(",")
+                        // Verificar si los archivos están en el directorio de trabajo
+                        def downloadedFiles = sh(
+                            script: "ls ${env.WORKSPACE}/logs_*.zip",
+                            returnStdout: true
+                        ).trim()
 
-                        // Enviar un correo electrónico con los archivos descargados como adjuntos
-                        emailext (
-                            to: "matiasrv96@gmail.com",
-                            subject: "Logs de ${tagValue} - Job #${env.BUILD_NUMBER}",
-                            body: "Adjunto se encuentran los logs comprimidos de las instancias EC2 etiquetadas como ${tagValue}.",
-                            attachmentsPattern: attachmentPattern,
-                            mimeType: 'text/plain'
-                        )
+                        if (downloadedFiles) {
+                            // Enviar un correo electrónico con los archivos descargados como adjuntos
+                            emailext (
+                                to: "matiasrv96@gmail.com",
+                                subject: "Logs de instancias EC2 - Job #${env.BUILD_NUMBER}",
+                                body: "Adjunto se encuentran los logs comprimidos de las instancias EC2.",
+                                attachmentsPattern: "logs_*.zip",
+                                mimeType: 'text/plain'
+                            )
+
+                            // Eliminar los archivos descargados
+                            sh """
+                            rm -f ${env.WORKSPACE}/logs_*.zip
+                            """
+                        } else {
+                            error("No se encontraron archivos descargados para adjuntar.")
+                        }
                     }
                 }
             }
