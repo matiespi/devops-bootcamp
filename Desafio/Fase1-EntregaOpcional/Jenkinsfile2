@@ -64,8 +64,8 @@ pipeline {
                         // Construir el patrón de adjuntos basado en los archivos descargados
                         def attachmentPattern = compressedLogs.collect { logFile ->
                             return "${env.WORKSPACE}/${logFile}"
-                        }.join(",")
-                        
+                        }.join(" ")  // Cambiado a espacios
+
                         echo "Archivos a adjuntar: ${attachmentPattern}"
                         
                         // Verificar si los archivos están en el directorio de trabajo
@@ -80,7 +80,7 @@ pipeline {
                                 to: "matiasrv96@gmail.com",
                                 subject: "Logs de instancias ${tagValue} - Job #${env.BUILD_NUMBER}",
                                 body: "Adjunto se encuentran los logs comprimidos de las instancias EC2.",
-                                attachmentsPattern: attachmentPattern,
+                                attachmentsPattern: "logs_*.zip",  // Aquí utilizamos un patrón general
                                 mimeType: 'text/plain'
                             )
 
